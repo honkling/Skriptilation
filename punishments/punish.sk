@@ -1,0 +1,122 @@
+options:
+	# %player% = the punisher, %arg-offlineplayer% = the punished person, %{_reason}% = reason, %{_a::2}% = how long the punishment lasts
+	# [puntype] = the type of punishment, banned, warned, muted, etc
+	punmsg: &3%player% &7[puntype] &3%arg-1% &7for &c%{_reason}% &7[%{_a::2}%]
+	unpunmsg: &3%player% &7un[puntype] &3%arg-1%
+	perm: staff.punish
+	noperm: &cInsufficient permissions!
+	banusage: &c/ban (player) (time | forever) [reason]
+	muteusage: &c/mute (player) (time | forever) [reason]
+	warnusage: &c/warn (player) [reason]
+	kickusage: &c/kick (player) [reason]
+	unbanusage: &c/unban (player)
+	unmuteusage: &c/unmute (player)
+	noreason: No reason specified
+
+function t2s(t: text) :: objects:
+	set {_} and {_a} to {_t} # {_} = letters, {_a} = numbers
+	replace all (("0123456789") split at "") in {_} with ""
+	replace all {_} in {_a} with ""
+	set {_a::*} to "s:1:SECONDS", "m:60:MINUTES", "h:3600:HOURS", "d:86400:DAYS", "w:604800:WEEKS", "mo:2419200:MONTHS", "y:29030400:YEARS", and "de:290304000:DECADES"
+	set {_b} to 1st element of ({_a::*} where ["%input%" contains "%{_}%:"])
+	set {_b::*} to ("%{_b}%") split at ":"
+	set {_c} to first (length of {_b::3} - 1) characters of {_b::3} if ({_a} parsed as int) is 1
+	return ({_b::2} parsed as int * {_a} parsed as int) and "%{_a}% %({_c} ? {_b::3})%"
+
+function getAfter(o: objects, i: num) :: objects:
+	loop integers between 1 and ({_i} - 1):
+		set {_c} to ({_c} ? 0) + 1
+		remove {_o::%{_c}%} from {_o::*}
+	return {_o::*}
+
+command ban <offlineplayer> <text> [<text>]:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@banusage}
+	trigger:
+		set {_a::*} to t2s(arg-2) if arg-2 isn't "forever"
+		set {_a::*} to t2s("999de") if arg-2 is "forever"
+		set {_a::2} to "FOREVER" if arg-2 is "forever"
+		set {_reason} to arg-3
+		set {ban::%arg-offlineplayer's uuid%::*} to (({ban::%arg-offlineplayer's uuid%::1} ? unix timestamp of now) + {_a::1}) and arg-3
+		kick arg-offlineplayer because "&cYou are banned!%nl%&7Time Left: &c%difference between {ban::%player's uuid%::1} and now%%nl%&7Reason: &c%arg-3%" if arg-offlineplayer is online
+		set {_} to "{@punmsg}"
+		replace all "[puntype]" in {_} with "banned"
+		replace all "<none>" in {_} with "{@noreason}"
+		send "%{_}%" to players where [input has permission "{@perm}"]
+		add "BAN|%player%|%now%|%unix date of {_a::1}%|%arg-3%" to {puns::%arg-offlineplayer's uuid%::*}
+
+command kick <player> [<text>]:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@kickusage}
+	trigger:
+		set {_reason} to arg-2
+		kick arg-player because "&cYou have been kicked!%nl%&7Reason: &c%arg-2 ? ""No reason specified""%"
+		set {_} to "{@punmsg}"
+		replace all "[puntype]" in {_} with "kicked"
+		replace all "[<none>]" in {_} with ""
+		replace all "<none>" in {_} with "{@noreason}"
+		send "%{_}%" to players where [input has permission "{@perm}"]
+		add "KICK|%player%|%now%|%arg-2 ? ""No reason specified""%" to {puns::%arg-offlineplayer's uuid%::*}
+
+command mute <offlineplayer> <text> [<text>]:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@muteusage}
+	trigger:
+		set {_reason} to arg-3
+		set {_a::*} to t2s(arg-2) if arg-2 isn't "forever"
+		set {_a::*} to t2s("999de") if arg-2 is "forever"
+		set {_a::2} to "FOREVER" if arg-2 is "forever"
+		set {mute::%arg-offlineplayer's uuid%::*} to (({mute::%arg-offlineplayer's uuid%::1} ? unix timestamp of now) + {_a::1}) and arg-3
+		set {_} to "{@punmsg}"
+		replace all "[puntype]" in {_} with "muted"
+		send "%{_}%" to players where [input has permission "{@perm}"]
+		add "MUTE|%player%|%now%|%unix date of {_a::1}%|%arg-3 ? ""No reason specified""%" to {puns::%arg-offlineplayer's uuid%::*}
+
+command unban <offlineplayer>:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@unbanusage}
+	trigger:
+		delete {ban::%arg-offlineplayer's uuid%::*}
+		set {_} to "{@unpunmsg}"
+		replace all "[puntype]" in {_} with "banned"
+		send "%{_}%" to players where [input has permission "{@perm}"]
+
+command unmute <offlineplayer>:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@unmuteusage}
+	trigger:
+		delete {mute::%arg-offlineplayer's uuid%::*}
+		set {_} to "{@unpunmsg}"
+		replace all "[puntype]" in {_} with "muted"
+		send "%{_}%" to players where [input has permission "{@perm}"]
+
+command warn <offlineplayer> [<text>]:
+	permission: {@perm}
+	permission message: {@noperm}
+	usage: {@warnusage}
+	trigger:
+		set {_reason} to arg-2
+		set {_} to "{@punmsg}"
+		replace all "[puntype]" in {_} with "warned"
+		replace all "[<none>]" in {_} with ""
+		send {_} to players where [input has permission "{@perm}"]
+		send "&7You were warned for &c%arg-2 ? ""No reason specified""%" to arg-offlineplayer if arg-offlineplayer is online
+		add "WARN|%player%|%now%|%arg-2 ? ""No reason specified""%" to {puns::%arg-offlineplayer's uuid%::*}
+
+on connect:
+	if {ban::%player's uuid%::*} is set:
+		kick player because "&cYou are banned!%nl%&7Expires At: &c%unix date of {ban::%player's uuid%::1}% &cUTC%nl%&7Reason: &c%{ban::%player's uuid%::2}%" if unix timestamp of now < {ban::%player's uuid%::1}
+		delete {ban::%player's uuid%::*} if unix timestamp of now >= {ban::%player's uuid%::1}
+
+on chat:
+	if {mute::%player's uuid%::*} is set:
+		if unix timestamp of now < {mute::%player's uuid%::1}:
+			cancel event
+			send "&7You are muted for &c%{mute::%player's uuid%::2}%&7! Expires At: &c%unix date of {mute::%player's uuid%::1}% &cUTC"
+		else:
+			delete {mute::%player's uuid%::*}
