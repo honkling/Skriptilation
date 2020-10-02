@@ -1,0 +1,68 @@
+options:
+	reportusage: &c/report (player) (reason) # Usage for /report
+	viewreportsperm: staff.reports # Permission node for /reports
+	viewreportsusage: &c/reports <view/remove/list> [id] # Usage for /reports
+	noperm: &cInsufficient permissions! # No permission message for /reports
+	maxreportlength: 30 # Maximum length for a report's reason
+	maxreportsinlist: 25 # How many reports show when you do /reports list
+	newreport: &3&lNew report! &3Case ID: &b%{_}% &3- &3Reported Player: &b%arg-player% &3- Reporter: &b%player% &3- Reason: %arg-text% # The message shown to staff members when somebody is reported
+
+function genID() :: int:
+	set {_} to random integer between 0 and 9999
+	if {reports::%{_}%} is set:
+		set {_} to genID()
+	return {_}
+
+command report <player> <text>:
+	usage: {@reportusage}
+	trigger:
+		if metadata value "report-%arg-player's uuid%" of player isn't set:
+			if length of arg-text > {@maxreportlength}:
+				send "&cThe length of your report is too long! Try again with a shorter reason."
+				stop
+			set metadata value "report-%arg-player's uuid%" of player to true
+			set {_} to genID()
+			set {reports::%{_}%} to "%player%|%arg-player%|%arg-text%"
+			send "&aSuccessfully reported %arg-player% &afor ""%arg-text%&a""!"
+			send "{@newreport}" to players where [input has permission "{@viewreportsperm}"]
+		else:
+			send "&cYou've already reported that player!"
+
+command reports <text> [<text>]:
+	usage: {@viewreportsusage}
+	permission: {@viewreportsperm}
+	permission message: {@noperm}
+	trigger:
+		if arg-1 is "view":
+			set {_} to 1st element of (arg-2 split at " ") parsed as int
+			if {_} isn't an int:
+				send "{@viewreportsusage}"
+			else if {reports::%{_}%} is set:
+				set {_a::*} to {reports::%{_}%} split at "|"
+				send "%nl%&3Information for case &b%{_}%%nl%&3Reporter: &b%{_a::1}%%nl%&3Reported User: &b%{_a::2}%%nl%&3Reason: &b%{_a::3}%%nl%&3Case ID: &b%{_}%%nl%"
+			else:
+				send "&cThat case doesn't exist!"
+		else if arg-1 is "remove":
+			set {_} to 1st element of (arg-2 split at " ") parsed as int
+			if {_} isn't an int:
+				send "{@viewreportsusage}"
+			else if {reports::%{_}%} is set:
+				delete {reports::%{_}%}
+				send "&3Case &b%{_}% &3has been deleted."
+			else:
+				send "&cThat case doesn't exist!"
+		else if arg-1 is "list":
+			if size of {reports::*} = 0:
+				send "&cThere are no reports to view!"
+				stop
+			send nl
+			loop {reports::*}:
+				set {_} to ({_} ? 0) + 1
+				if {_} >= {@maxreportsinlist}:
+					send "&3..and &b%size of {reports::*} - {@maxreportsinlist}% &3more"
+					stop loop
+				set {_a::*} to loop-value split at "|"
+				send "&3Case ID: &b%loop-index% &3- Reported User: &b%{_a::2}% &3- Reporter: &b%{_a::1}% &3- Reason: &b%{_a::3}%"
+			send nl
+		else:
+			send "{@viewreportsusage}"
