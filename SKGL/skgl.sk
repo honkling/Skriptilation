@@ -1,0 +1,339 @@
+on load:
+    set {SKGL::settings::running} to false
+    #set {ico::faces::*} to prepareObject((((0.0, -1.0, 0.0), (0.7236, -0.447215, 0.52572), (-0.276385, -0.447215, 0.85064)), ((0.7236, -0.447215, 0.52572), (0.0, -1.0, 0.0), (0.7236, -0.447215, -0.52572)), ((0.0, -1.0, 0.0), (-0.276385, -0.447215, 0.85064), (-0.894425, -0.447215, 0.0)), ((0.0, -1.0, 0.0), (-0.894425, -0.447215, 0.0), (-0.276385, -0.447215, -0.85064)), ((0.0, -1.0, 0.0), (-0.276385, -0.447215, -0.85064), (0.7236, -0.447215, -0.52572)), ((0.7236, -0.447215, 0.52572), (0.7236, -0.447215, -0.52572), (0.894425, 0.447215, 0.0)), ((-0.276385, -0.447215, 0.85064), (0.7236, -0.447215, 0.52572), (0.276385, 0.447215, 0.85064)), ((-0.894425, -0.447215, 0.0), (-0.276385, -0.447215, 0.85064), (-0.7236, 0.447215, 0.52572)), ((-0.276385, -0.447215, -0.85064), (-0.894425, -0.447215, 0.0), (-0.7236, 0.447215, -0.52572)), ((0.7236, -0.447215, -0.52572), (-0.276385, -0.447215, -0.85064), (0.276385, 0.447215, -0.85064)), ((0.7236, -0.447215, 0.52572), (0.894425, 0.447215, 0.0), (0.276385, 0.447215, 0.85064)), ((-0.276385, -0.447215, 0.85064), (0.276385, 0.447215, 0.85064), (-0.7236, 0.447215, 0.52572)), ((-0.894425, -0.447215, 0.0), (-0.7236, 0.447215, 0.52572), (-0.7236, 0.447215, -0.52572)), ((-0.276385, -0.447215, -0.85064), (-0.7236, 0.447215, -0.52572), (0.276385, 0.447215, -0.85064)), ((0.7236, -0.447215, -0.52572), (0.276385, 0.447215, -0.85064), (0.894425, 0.447215, 0.0)), ((0.276385, 0.447215, 0.85064), (0.894425, 0.447215, 0.0), (0.0, 1.0, 0.0)), ((-0.7236, 0.447215, 0.52572), (0.276385, 0.447215, 0.85064), (0.0, 1.0, 0.0)), ((-0.7236, 0.447215, -0.52572), (-0.7236, 0.447215, 0.52572), (0.0, 1.0, 0.0)), ((0.276385, 0.447215, -0.85064), (-0.7236, 0.447215, -0.52572), (0.0, 1.0, 0.0)), ((0.894425, 0.447215, 0.0), (0.276385, 0.447215, -0.85064), (0.0, 1.0, 0.0))))
+    set {cube::faces::*} to prepareObject((-1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0))
+    set {cube::faces::*} to scaleObject({cube::faces::*}, "*", 15)
+    set {SKGL::extra::light} to vector 1, -1, 1
+    set {SKGL::extra::camera} to vector 0, 0, 0
+    wait 1 second
+    set {SKGL::settings::running} to true
+    send "&aSKGL loaded" to console
+    while 1 = 1:
+        wait 1 ticks
+        set {SKGL::time} to now
+        drawObject({cube::faces::*}, 50)
+        renderScene()
+        set {cube::faces::*} to rotateObject({cube::faces::*}, "z", 5)
+        if {SKGL::settings::running} = false:
+            exit
+
+on map:
+    set {SKGL::map} to event-map
+    manage map {SKGL::map}
+
+function clearMap(c: number = 34):
+    set {_x} to 0
+    while {_x} < 128:
+        set {_y} to 0
+        while {_y} < 128:
+            set map pixle at {_x}, {_y} on map {SKGL::map} to {_c}
+            set {_y} to {_y} + 1
+        set {_x} to {_x} + 1
+
+function setPixel(x: number, y: number, c: int = 34):
+    set map pixle at round({_x}) + 64, round({_y}) + 64 on map {SKGL::map} to {_c}
+
+function drawLine(p1: numbers, p2: numbers, clr: number = 119):
+    set {_dx} to {_p2::1} - {_p1::1}
+    set {_dy} to {_p2::2} - {_p1::2}
+    if {_p1::1} != {_p2::1}:
+        loop integers from {_p1::1} to {_p2::1}:
+            set {_} to {_y} if {_y} is set else {_p1::2}
+            set {_y} to round({_p1::2} + {_dy} * (loop-value - {_p1::1}) / {_dx})
+            loop numbers from {_} to {_y}:
+                setPixel(round(loop-value-1), round(loop-value-2), {_clr})
+    else:
+        loop numbers from {_p1::2} to {_p2::2}:
+            setPixel({_p1::1}, round(loop-value), {_clr})
+
+function drawTri(p: numbers, clr: num = 119, f: boolean = false):
+    if {SKGL::settings::wire} is false:
+        fillTri(({_p::1}, {_p::2}, {_p::3}, {_p::4}, {_p::5}, {_p::6}), {_clr})
+    else:
+        drawLine(({_p::1}, {_p::2}), ({_p::3}, {_p::4}), {_clr})
+        drawLine(({_p::3}, {_p::4}), ({_p::5}, {_p::6}), {_clr})
+        drawLine(({_p::5}, {_p::6}), ({_p::1}, {_p::2}), {_clr})
+
+function fillTriNotWorkingVeryWell(p: numbers, clr: number = 119):
+    set {_p1::*} to ({_p::1}, {_p::2})
+    set {_p2::*} to ({_p::3}, {_p::4})
+    set {_dx} to {_p2::1} - {_p1::1}
+    set {_dy} to {_p2::2} - {_p1::2}
+    if {_p1::1} != {_p2::1}:
+        set {_i} to {_p1::1}
+
+        while {_i} <= {_p2::1}:
+            set {_j} to {_y} if {_y} is set else {_p1::2}
+            set {_y} to round({_p1::2} + {_dy} * ({_i} - {_p1::1}) / {_dx})
+
+            while {_j} <= {_y}:
+                drawLine((round({_i}), round({_j})), ({_p::5}, {_p::6}), {_clr})
+                set {_j} to {_j} + 1
+
+            set {_i} to {_i} + 1
+    else:
+        loop numbers from {_p1::2} to {_p2::2}:
+            drawLine((round({_p1::1}), round(loop-value)), ({_p::5}, {_p::6}), {_clr})
+
+function fillTri(p: numbers, clr: number = 119):
+    set {_p1::*} to ({_p::1}, {_p::2})
+    set {_p2::*} to ({_p::3}, {_p::4})
+    set {_dx} to {_p2::1} - {_p1::1}
+    set {_dy} to {_p2::2} - {_p1::2}
+    if {_p1::1} != {_p2::1}:
+        loop integers from {_p1::1} to {_p2::1}:
+            set {_} to {_y} if {_y} is set else {_p1::2}
+            set {_y} to round({_p1::2} + {_dy} * (loop-value - {_p1::1}) / {_dx})
+            loop numbers from {_} to {_y}:
+                drawLine((round(loop-value-1), round(loop-value-2)), ({_p::5}, {_p::6}), {_clr})
+    else:
+        loop numbers from {_p1::2} to {_p2::2}:
+            drawLine((round({_p1::1}), round(loop-value)), ({_p::5}, {_p::6}), {_clr})
+
+function prepareObject(o: objects) :: objects:
+    loop {_o::*}:
+        set {_i} to loop-index parsed as int
+        if mod({_i}, 3) = 0:
+            set {_x} to {_i} - 2
+            set {_y} to {_i} - 1
+            set {_z} to {_i}
+
+            set {_x} to {_o::%{_x}%}
+            set {_y} to {_o::%{_y}%}
+            set {_z} to {_o::%{_z}%}
+
+            add vector {_x}, {_y}, {_z} to {_ot::*}
+    return {_ot::*}
+
+function drawObject(o: objects, oc: objects):
+    loop {_o::*}:
+        set {_i} to loop-index parsed as int
+        if mod({_i}, 3) = 0:
+            set {_av} to {_i} - 2
+            set {_bv} to {_i} - 1
+            set {_cv} to {_i}
+
+            set {_av} to {_o::%{_av}%}
+            set {_bv} to {_o::%{_bv}%}
+            set {_cv} to {_o::%{_cv}%}
+
+            set {_l1x} to x of {_av} - x of {_bv}
+            set {_l1y} to y of {_av} - y of {_bv}
+            set {_l1z} to z of {_av} - z of {_bv}
+
+            set {_l2x} to x of {_cv} - x of {_bv}
+            set {_l2y} to y of {_cv} - y of {_bv}
+            set {_l2z} to z of {_cv} - z of {_bv}
+
+            set {_nx} to {_l1y} * {_l2z} - {_l1z} * {_l2y}
+            set {_ny} to {_l1z} * {_l2x} - {_l1x} * {_l2z}
+            set {_nz} to {_l1x} * {_l2y} - {_l1y} * {_l2x}
+
+            set {_ln} to sqrt({_nx} * {_nx} + {_ny} * {_ny} + {_nz} * {_nz})
+
+            set {_nx} to {_nx} / {_ln}
+            set {_ny} to {_ny} / {_ln}
+            set {_nz} to {_nz} / {_ln}
+
+            if {SKGL::settings::cull} is false:
+                set {_nz} to -1
+
+            if {_nz} < 0:
+
+                set {_avx} to (x of {_av} + x of {_bv} + x of {_cv}) / 3
+                set {_avy} to (y of {_av} + y of {_bv} + y of {_cv}) / 3
+                set {_avz} to (z of {_av} + z of {_bv} + z of {_cv}) / 3
+
+                set {_ctri::*} to {_av}, {_bv} and {_cv}
+                if size of {_oc::*} = 1:
+                    set {_tric} to {_oc::1}
+                else:
+                    set {_ci} to "%{_i} / 3%" parsed as int
+                    set {_tric} to {_oc::%{_ci}%}
+                
+                set {_nl} to normalized {SKGL::extra::light}
+                set {_fn} to vector {_nx}, {_ny}, {_nz}
+                set {_s} to {_nl} dot {_fn} * -10
+
+                if {_s} > 7.5:
+                    set {_tric} to 26
+                else if {_s} < 7.5:
+                    if {_s} > 5:
+                        set {_tric} to 25
+                    else if {_s} < 5:
+                        if {_s} > 2:
+                            set {_tric} to 24
+                        else:
+                            set {_tric} to 27
+                    else:
+                        set {_tric} to 24
+                else:
+                    set {_tric} to 24
+
+                sortTri({_ctri::*}, {_tric}, sqrt((0 - {_avx})^2 + (0 - {_avy})^2 + (0 - {_avz})^2))
+
+function renderScene():
+    clearMap(119)
+
+    if {SKGL::map} is not set:
+        exit
+    loop {SKGL::tris::*}:
+        set {_i} to loop-index parsed as int
+        if mod({_i}, 5) = 0:
+            set {_av} to {_i} - 4
+            set {_bv} to {_i} - 3
+            set {_cv} to {_i} - 2
+            set {_tc} to {_i} - 1
+
+            set {_av} to {SKGL::tris::%{_av}%}
+            set {_bv} to {SKGL::tris::%{_bv}%}
+            set {_cv} to {SKGL::tris::%{_cv}%}
+            set {_tc} to {SKGL::tris::%{_tc}%}
+
+            set {_avz} to sqrt((z of {_av})^2 + (z of {_bv})^2 + (z of {_cv})^2)
+
+            set {_sax} to (round(x of {_av} + 20 / (z of {_av} + 100)))
+            set {_say} to (round(y of {_av} + 20 / (z of {_av} + 100)))
+
+            set {_sbx} to (round(x of {_bv} + 20 / (z of {_bv} + 100)))
+            set {_sby} to (round(y of {_bv} + 20 / (z of {_bv} + 100)))
+
+            set {_scx} to (round(x of {_cv} + 20 / (z of {_cv} + 100)))
+            set {_scy} to (round(y of {_cv} + 20 / (z of {_cv} + 100)))
+
+            drawTri(({_sax}, {_say}, {_sbx}, {_sby}, {_scx}, {_scy}), {_tc}) # 26
+
+            add 1 to {SKGL::tric}
+
+    if {SKGL::settings::stats} = true:
+        send actionbar "&cTime: %difference between now and {SKGL::time}% &6@ %{SKGL::tric}% tris" to all players
+    set {SKGL::tric} to 0
+    clear {SKGL::tris::*}
+
+function sortTri(l: objects, c: int, d: number):
+    add {_c} and {_d} to {_l::*}
+    if size of {SKGL::tris::*} > 0:
+        loop {SKGL::tris::*}:
+            set {_i} to loop-index parsed as int + 1
+            if mod(loop-index parsed as int, 5) = 0:
+                if loop-value > {_d}:
+                    add {_l::*} to {SKGL::tris::*}
+                    stop loop
+                else if {SKGL::tris::%{_i}%} is not set:
+                    set {SKGL::tris::*} to push({SKGL::tris::*}, 1, {_l::*})
+                    stop loop
+                else:
+                    set {SKGL::tris::*} to push({SKGL::tris::*}, 1, {_l::*})
+                    stop loop
+    else:
+        add {_l::*} to {SKGL::tris::*}
+
+function push(o: objects, i: int, n: objects) :: objects:
+    loop integers between {_i} and size of {_o::*}:
+        add {_o::%loop-int%} to {_a::*}
+        remove {_o::%loop-int%} from {_o::*}
+    add {_n::*} to {_o::*}
+    add {_a::*} to {_o::*}
+    return {_o::*}
+
+function range(n: number) :: number:
+    if {_n} > 64:
+        return 64
+    else if {_n} < -64:
+        return -64
+    else:
+        return {_n}
+
+function translateObject(o: objects, a: text, n: number) :: objects:
+    if {_a} = "x":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v} + {_n}
+            set the y of {_v} to the y of {_v}
+            set the z of {_v} to the z of {_v}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "y":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v}
+            set the y of {_v} to the y of {_v} + {_n}
+            set the z of {_v} to the z of {_v}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "z":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v}
+            set the y of {_v} to the y of {_v}
+            set the z of {_v} to the z of {_v} + {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+
+function rotateObject(o: objects, a: text, n: number) :: objects:
+    if {_a} = "x":
+        loop {_o::*}:
+            set {_v} to loop-value
+            rotate {_v} around x-axis by {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "y":
+        loop {_o::*}:
+            set {_v} to loop-value
+            rotate {_v} around y-axis by {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "z":
+        loop {_o::*}:
+            set {_v} to loop-value
+            rotate {_v} around z-axis by {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+
+function scaleObject(o: objects, a: text, n: number) :: objects:
+    if {_a} = "x":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v} * {_n}
+            set the y of {_v} to the y of {_v}
+            set the z of {_v} to the z of {_v}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "y":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v}
+            set the y of {_v} to the y of {_v} * {_n}
+            set the z of {_v} to the z of {_v}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "z":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v}
+            set the y of {_v} to the y of {_v}
+            set the z of {_v} to the z of {_v} * {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+    else if {_a} = "*":
+        loop {_o::*}:
+            set {_v} to loop-value
+            set the x of {_v} to the x of {_v} * {_n}
+            set the y of {_v} to the y of {_v} * {_n}
+            set the z of {_v} to the z of {_v} * {_n}
+            add {_v} to {_ot::*}
+        return {_ot::*}
+
+command /skgl <text> <boolean=false>:
+    usage: &cUsage: /skgl debug true/false
+    trigger:
+        if arg-1 = "wire":
+            set {SKGL::settings::wire} to arg-2
+        else if arg-1 = "cull":
+            set {SKGL::settings::cull} to arg-2
+        else if arg-1 = "stats":
+            set {SKGL::settings::stats} to arg-2
+        else if arg-1 = "stop":
+            set {SKGL::settings::running} to false
+            wait 2 ticks
+            set {SKGL::settings::running} to true
